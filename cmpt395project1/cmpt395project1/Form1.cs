@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;  
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data.SqlClient;  
 
 namespace cmpt395project1
 {
@@ -24,7 +24,7 @@ namespace cmpt395project1
             try
             {
                 myConnection = new SqlConnection(
-                    "Server=LAPTOP-3MSVSB2A;" +
+                    "Server=DESKTOP-ACSBV06;" +
                     "Database=Academic_Department_Course;" +
                     "Integrated Security=True;"
                 );
@@ -87,6 +87,15 @@ namespace cmpt395project1
             dgvCart.Columns.Add("Day", "Day");
             dgvCart.Columns.Add("StartTime", "Start Time");
             dgvCart.Columns.Add("EndTime", "End Time");
+
+            dgvEnrolled.Columns.Add("StudentID", "Student ID");
+            dgvEnrolled.Columns.Add("SectionID", "Section ID");
+            dgvEnrolled.Columns.Add("CourseCode", "Course Code");
+            dgvEnrolled.Columns.Add("CourseName", "Course Name");
+            dgvEnrolled.Columns.Add("Instructor", "Instructor");
+            dgvEnrolled.Columns.Add("Day", "Day");
+            dgvEnrolled.Columns.Add("StartTime", "Start Time");
+            dgvEnrolled.Columns.Add("EndTime", "End Time");
         }
 
         // main search function, queries database for courses matching selected term and year, displays results in datagridview
@@ -191,6 +200,7 @@ namespace cmpt395project1
                 selectedRow.Cells["EndTime"].Value.ToString()
             );
 
+
             MessageBox.Show("Course added to cart!", "Success");
         }
 
@@ -199,6 +209,123 @@ namespace cmpt395project1
         {
             dgvCart.Rows.Clear();
             MessageBox.Show("Cart cleared!", "Success");
+        }
+
+        private void btnRegister_Click_1(object sender, EventArgs e)
+        {
+            // Make sure a row is selected
+            if (dgvEnrolled.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Please select a course to register.", "Error");
+                return;
+            }
+
+            try
+            {
+                // Get selected row
+                DataGridViewRow selectedRow = dgvEnrolled.SelectedRows[0];
+
+                int studentID = int.Parse(
+                    selectedRow.Cells["StudentID"].Value.ToString()
+                );
+
+                int sectionID = int.Parse(
+                    selectedRow.Cells["SectionID"].Value.ToString()
+                );
+
+                // Count registrations BEFORE
+                SqlCommand countBeforeCmd = new SqlCommand(
+                    "SELECT COUNT(*) FROM Registration",
+                    myConnection
+                );
+
+                int beforeCount = (int)countBeforeCmd.ExecuteScalar();
+
+                // Run stored procedure
+                myCommand.Parameters.Clear();
+
+                myCommand.CommandText = "RegisterStudent";
+                myCommand.CommandType = CommandType.StoredProcedure;
+
+                myCommand.Parameters.AddWithValue("@StudentID", studentID);
+                myCommand.Parameters.AddWithValue("@SectionID", sectionID);
+                myCommand.Parameters.AddWithValue("@RegistrationDate", DateTime.Now);
+
+                myCommand.ExecuteNonQuery();
+
+                // Count registrations AFTER
+                SqlCommand countAfterCmd = new SqlCommand(
+                    "SELECT COUNT(*) FROM Registration",
+                    myConnection
+                );
+
+                int afterCount = (int)countAfterCmd.ExecuteScalar();
+
+                // Reset command type
+                myCommand.CommandType = CommandType.Text;
+
+                // Check if registration succeeded
+                if (afterCount > beforeCount)
+                {
+                    MessageBox.Show("Registration successful!", "Success");
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Registration failed.\n" +
+                        "Possible reasons:\n" +
+                        "- Already enrolled\n" +
+                        "- Missing prerequisite\n" +
+                        "- Course full\n" +
+                        "- Schedule conflict",
+                        "Failed"
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Error");
+            }
+        }
+
+        private void EnrolSearch_Click(object sender, EventArgs e)
+        {
+            dgvEnrolled.Rows.Clear();
+
+            string studentID = txtEnrollStudentID.Text;
+
+            if (studentID == "")
+            {
+                MessageBox.Show("Please enter a Student ID.", "Error");
+                return;
+            }
+
+            bool found = false;
+
+            foreach (DataGridViewRow row in dgvCart.Rows)
+            {
+                if (row.Cells["StudentID"].Value != null &&
+                    row.Cells["StudentID"].Value.ToString() == studentID)
+                {
+                    dgvEnrolled.Rows.Add(
+                        row.Cells["StudentID"].Value.ToString(),
+                        row.Cells["SectionID"].Value.ToString(),
+                        row.Cells["CourseCode"].Value.ToString(),
+                        row.Cells["CourseName"].Value.ToString(),
+                        row.Cells["Instructor"].Value.ToString(),
+                        row.Cells["Day"].Value.ToString(),
+                        row.Cells["StartTime"].Value.ToString(),
+                        row.Cells["EndTime"].Value.ToString()
+                    );
+
+                    found = true;
+                }
+            }
+
+            if (!found)
+            {
+                MessageBox.Show("No courses found for this student.", "Info");
+            }
         }
     }
 }
@@ -213,3 +340,4 @@ namespace cmpt395project1
  * - Database connection already set up: use myConnection and myCommand
  * - Stored procedure: EXEC RegisterStudent @StudentID, @SectionID, @RegistrationDate
  */
+
