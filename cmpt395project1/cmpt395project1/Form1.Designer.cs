@@ -42,11 +42,11 @@
             this.lblTerm = new System.Windows.Forms.Label();
             this.lblStudentID = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.EnrolSearch = new System.Windows.Forms.Button();
             this.dgvEnrolled = new System.Windows.Forms.DataGridView();
             this.btnRegister = new System.Windows.Forms.Button();
             this.txtEnrollStudentID = new System.Windows.Forms.TextBox();
             this.lblEnrollStudentID = new System.Windows.Forms.Label();
-            this.EnrolSearch = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCart)).BeginInit();
@@ -164,6 +164,7 @@
             this.txtStudentID.Name = "txtStudentID";
             this.txtStudentID.Size = new System.Drawing.Size(100, 20);
             this.txtStudentID.TabIndex = 3;
+            this.txtStudentID.TextChanged += new System.EventHandler(this.txtStudentID_TextChanged);
             // 
             // lblYear
             // 
@@ -208,6 +209,16 @@
             this.tabPage2.Text = "Enroll";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // EnrolSearch
+            // 
+            this.EnrolSearch.Location = new System.Drawing.Point(366, 48);
+            this.EnrolSearch.Name = "EnrolSearch";
+            this.EnrolSearch.Size = new System.Drawing.Size(75, 23);
+            this.EnrolSearch.TabIndex = 4;
+            this.EnrolSearch.Text = "Search";
+            this.EnrolSearch.UseVisualStyleBackColor = true;
+            this.EnrolSearch.Click += new System.EventHandler(this.EnrolSearch_Click);
+            // 
             // dgvEnrolled
             // 
             this.dgvEnrolled.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -244,16 +255,6 @@
             this.lblEnrollStudentID.Size = new System.Drawing.Size(61, 13);
             this.lblEnrollStudentID.TabIndex = 0;
             this.lblEnrollStudentID.Text = "Student ID:";
-            // 
-            // EnrolSearch
-            // 
-            this.EnrolSearch.Location = new System.Drawing.Point(366, 48);
-            this.EnrolSearch.Name = "EnrolSearch";
-            this.EnrolSearch.Size = new System.Drawing.Size(75, 23);
-            this.EnrolSearch.TabIndex = 4;
-            this.EnrolSearch.Text = "Search";
-            this.EnrolSearch.UseVisualStyleBackColor = true;
-            this.EnrolSearch.Click += new System.EventHandler(this.EnrolSearch_Click);
             // 
             // Form1
             // 

@@ -20,11 +20,12 @@ namespace cmpt395project1
         public Form1()
         {
             InitializeComponent();
-
+            
             try
             {
                 myConnection = new SqlConnection(
-                    "Server=DESKTOP-ACSBV06;" +
+                    "Server=LAPTOP-3MSVSB2A;" +
+                    //"Server=DESKTOP-ACSBV06;" +
                     "Database=Academic_Department_Course;" +
                     "Integrated Security=True;"
                 );
@@ -156,6 +157,16 @@ namespace cmpt395project1
             {
                 MessageBox.Show(ex.ToString(), "Error");
             }
+
+            // Show only current student's cart
+            foreach (DataGridViewRow row in dgvCart.Rows)
+            {
+                if (!row.IsNewRow)
+                {
+                    row.Visible = row.Cells["StudentID"].Value != null &&
+                                  row.Cells["StudentID"].Value.ToString() == txtStudentID.Text;
+                }
+            }
         }
 
         // adds selected course from search results to cart datagridview, checks for duplicates
@@ -207,8 +218,17 @@ namespace cmpt395project1
         // clears all courses from cart datagridview
         private void btnClearCart_Click(object sender, EventArgs e)
         {
-            dgvCart.Rows.Clear();
-            MessageBox.Show("Cart cleared!", "Success");
+            string studentID = txtStudentID.Text;
+            // Remove only rows that match the current student ID
+            for (int i = dgvCart.Rows.Count - 1; i >= 0; i--)
+            {
+                if (dgvCart.Rows[i].Cells["StudentID"].Value != null &&
+                    dgvCart.Rows[i].Cells["StudentID"].Value.ToString() == studentID)
+                {
+                    dgvCart.Rows.RemoveAt(i);
+                }
+            }
+            MessageBox.Show("Your cart has been cleared!", "Success");
         }
 
         private void btnRegister_Click_1(object sender, EventArgs e)
@@ -325,6 +345,22 @@ namespace cmpt395project1
             if (!found)
             {
                 MessageBox.Show("No courses found for this student.", "Info");
+            }
+        }
+
+        private void txtStudentID_TextChanged(object sender, EventArgs e)
+        {
+
+            dgvCourses.Rows.Clear();
+            dgvCourses.Columns.Clear();
+            // whenever a new studentid is input, show only that student's cart items instantly
+            foreach (DataGridViewRow row in dgvCart.Rows)
+            {
+                if (!row.IsNewRow)
+                {
+                    row.Visible = row.Cells["StudentID"].Value != null &&
+                                  row.Cells["StudentID"].Value.ToString() == txtStudentID.Text;
+                }
             }
         }
     }
