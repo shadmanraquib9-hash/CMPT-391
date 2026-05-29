@@ -1,3 +1,6 @@
+--First run the create part then  turn them into comment then run the check part
+
+------CREATE
 --Course seat available
 
 CREATE VIEW mv_cou_seat_ava
@@ -56,3 +59,9 @@ GO
 CREATE UNIQUE CLUSTERED INDEX idx_mv_Stud_reg_sum
 ON mmv_Stud_reg_sum(StudentID, SectionID);
 GO
+
+--Make sure to turn everything above into comment before running the check
+----CHECK
+SELECT * FROM mv_Stud_reg_sum;
+SELECT * FROM mv_stud_cart_sum;
+SELECT * FROM mv_cou_seat_ava;
