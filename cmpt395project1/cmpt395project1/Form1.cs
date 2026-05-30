@@ -233,10 +233,10 @@ namespace cmpt395project1
 
         private void btnRegister_Click_1(object sender, EventArgs e)
         {
-            // Make sure a row is selected
+            // Make sure user selected a course
             if (dgvEnrolled.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Please select a course to register.", "Error");
+                MessageBox.Show("Please select a course to enroll in.");
                 return;
             }
 
@@ -253,58 +253,51 @@ namespace cmpt395project1
                     selectedRow.Cells["SectionID"].Value.ToString()
                 );
 
-                // Count registrations BEFORE
-                SqlCommand countBeforeCmd = new SqlCommand(
-                    "SELECT COUNT(*) FROM Registration",
-                    myConnection
-                );
-
-                int beforeCount = (int)countBeforeCmd.ExecuteScalar();
-
-                // Run stored procedure
+                // Clear old parameters
                 myCommand.Parameters.Clear();
 
+                // Stored procedure setup
                 myCommand.CommandText = "RegisterStudent";
                 myCommand.CommandType = CommandType.StoredProcedure;
 
+                // INPUT parameters
                 myCommand.Parameters.AddWithValue("@StudentID", studentID);
                 myCommand.Parameters.AddWithValue("@SectionID", sectionID);
                 myCommand.Parameters.AddWithValue("@RegistrationDate", DateTime.Now);
 
+                // OUTPUT parameter: Success
+                SqlParameter successParam =
+                    new SqlParameter("@Success", SqlDbType.Bit);
+
+                successParam.Direction = ParameterDirection.Output;
+
+                myCommand.Parameters.Add(successParam);
+
+                // OUTPUT parameter: Message
+                SqlParameter messageParam =
+                    new SqlParameter("@Message", SqlDbType.VarChar, 255);
+
+                messageParam.Direction = ParameterDirection.Output;
+
+                myCommand.Parameters.Add(messageParam);
+
+                // Execute stored procedure
                 myCommand.ExecuteNonQuery();
 
-                // Count registrations AFTER
-                SqlCommand countAfterCmd = new SqlCommand(
-                    "SELECT COUNT(*) FROM Registration",
-                    myConnection
-                );
+                // Read OUTPUT values
+                bool success = Convert.ToBoolean(successParam.Value);
 
-                int afterCount = (int)countAfterCmd.ExecuteScalar();
+                string message = messageParam.Value.ToString();
+
+                // Show SQL message
+                MessageBox.Show(message);
 
                 // Reset command type
                 myCommand.CommandType = CommandType.Text;
-
-                // Check if registration succeeded
-                if (afterCount > beforeCount)
-                {
-                    MessageBox.Show("Registration successful!", "Success");
-                }
-                else
-                {
-                    MessageBox.Show(
-                        "Registration failed.\n" +
-                        "Possible reasons:\n" +
-                        "- Already enrolled\n" +
-                        "- Missing prerequisite\n" +
-                        "- Course full\n" +
-                        "- Schedule conflict",
-                        "Failed"
-                    );
-                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Error");
+                MessageBox.Show(ex.Message, "Error");
             }
         }
 
