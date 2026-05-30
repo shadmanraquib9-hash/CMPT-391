@@ -350,7 +350,7 @@ namespace cmpt395project1
 
         private void txtStudentID_TextChanged(object sender, EventArgs e)
         {
-
+            // clears search whenever student ID is changed, forces user to click search again to see courses for new student ID, also clears cart and enrolled datagridviews to prevent confusion
             dgvCourses.Rows.Clear();
             dgvCourses.Columns.Clear();
             // whenever a new studentid is input, show only that student's cart items instantly
@@ -367,13 +367,4 @@ namespace cmpt395project1
 }
 
 
-/*
- * ENROLL TAB NOTES:
- * - Cart data is in dgvCart (in memory)
- * - Each row has StudentID column - filter by this to get the right student's courses
- * - Get student ID from txtEnrollStudentID.Text on Enroll tab
- * - Loop through dgvCart rows where StudentID matches, call RegisterStudent for each
- * - Database connection already set up: use myConnection and myCommand
- * - Stored procedure: EXEC RegisterStudent @StudentID, @SectionID, @RegistrationDate
- */
 
