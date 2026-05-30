@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.DataWarehouse = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.btnClearCart = new System.Windows.Forms.Button();
             this.dgvCart = new System.Windows.Forms.DataGridView();
@@ -46,24 +46,33 @@
             this.btnRegister = new System.Windows.Forms.Button();
             this.txtEnrollStudentID = new System.Windows.Forms.TextBox();
             this.lblEnrollStudentID = new System.Windows.Forms.Label();
-            this.tabControl1.SuspendLayout();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.cboView = new System.Windows.Forms.ComboBox();
+            this.dgvResults = new System.Windows.Forms.DataGridView();
+            this.btnRun = new System.Windows.Forms.Button();
+            this.btnUpload = new System.Windows.Forms.Button();
+            this.lblStatus = new System.Windows.Forms.Label();
+            this.DataWarehouse.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCourses)).BeginInit();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvEnrolled)).BeginInit();
+            this.tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvResults)).BeginInit();
             this.SuspendLayout();
             // 
-            // tabControl1
+            // DataWarehouse
             // 
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(0, 0);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(800, 450);
-            this.tabControl1.TabIndex = 0;
+            this.DataWarehouse.Controls.Add(this.tabPage1);
+            this.DataWarehouse.Controls.Add(this.tabPage2);
+            this.DataWarehouse.Controls.Add(this.tabPage3);
+            this.DataWarehouse.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.DataWarehouse.Location = new System.Drawing.Point(0, 0);
+            this.DataWarehouse.Name = "DataWarehouse";
+            this.DataWarehouse.SelectedIndex = 0;
+            this.DataWarehouse.Size = new System.Drawing.Size(800, 450);
+            this.DataWarehouse.TabIndex = 0;
             // 
             // tabPage1
             // 
@@ -242,16 +251,80 @@
             this.lblEnrollStudentID.TabIndex = 0;
             this.lblEnrollStudentID.Text = "Student ID:";
             // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.lblStatus);
+            this.tabPage3.Controls.Add(this.btnUpload);
+            this.tabPage3.Controls.Add(this.btnRun);
+            this.tabPage3.Controls.Add(this.dgvResults);
+            this.tabPage3.Controls.Add(this.cboView);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(792, 424);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "DataWarehouse";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // cboView
+            // 
+            this.cboView.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboView.FormattingEnabled = true;
+            this.cboView.Items.AddRange(new object[] {
+            "Roll-up by university",
+            "Drill-Down by department",
+            "By instructor",
+            "By semester / year"});
+            this.cboView.Location = new System.Drawing.Point(16, 40);
+            this.cboView.Name = "cboView";
+            this.cboView.Size = new System.Drawing.Size(121, 21);
+            this.cboView.TabIndex = 0;
+            // 
+            // dgvResults
+            // 
+            this.dgvResults.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvResults.Location = new System.Drawing.Point(16, 144);
+            this.dgvResults.Name = "dgvResults";
+            this.dgvResults.Size = new System.Drawing.Size(736, 200);
+            this.dgvResults.TabIndex = 1;
+            // 
+            // btnRun
+            // 
+            this.btnRun.Location = new System.Drawing.Point(584, 56);
+            this.btnRun.Name = "btnRun";
+            this.btnRun.Size = new System.Drawing.Size(75, 23);
+            this.btnRun.TabIndex = 2;
+            this.btnRun.Text = "Run Query";
+            this.btnRun.UseVisualStyleBackColor = true;
+            // 
+            // btnUpload
+            // 
+            this.btnUpload.Location = new System.Drawing.Point(672, 56);
+            this.btnUpload.Name = "btnUpload";
+            this.btnUpload.Size = new System.Drawing.Size(75, 23);
+            this.btnUpload.TabIndex = 3;
+            this.btnUpload.Text = "Upload XML";
+            this.btnUpload.UseVisualStyleBackColor = true;
+            // 
+            // lblStatus
+            // 
+            this.lblStatus.AutoSize = true;
+            this.lblStatus.Location = new System.Drawing.Point(16, 24);
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(35, 13);
+            this.lblStatus.TabIndex = 4;
+            this.lblStatus.Text = "label1";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.DataWarehouse);
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load_1);
-            this.tabControl1.ResumeLayout(false);
+            this.DataWarehouse.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCart)).EndInit();
@@ -259,13 +332,16 @@
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvEnrolled)).EndInit();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvResults)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabControl DataWarehouse;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.DataGridView dgvCourses;
@@ -283,6 +359,12 @@
         private System.Windows.Forms.Button btnClearCart;
         private System.Windows.Forms.DataGridView dgvCart;
         private System.Windows.Forms.Button btnAddToCart;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.Label lblStatus;
+        private System.Windows.Forms.Button btnUpload;
+        private System.Windows.Forms.Button btnRun;
+        private System.Windows.Forms.DataGridView dgvResults;
+        private System.Windows.Forms.ComboBox cboView;
     }
 }
 

@@ -16,6 +16,7 @@ namespace cmpt395project1
         SqlConnection myConnection;
         SqlCommand myCommand;
         SqlDataReader myReader;
+        SqlConnection warehouseConnection;
 
         public Form1()
         {
@@ -35,7 +36,25 @@ namespace cmpt395project1
             catch
             {
             }
-            
+
+            // Part 2 connection
+            try
+            {
+                warehouseConnection = new SqlConnection(
+                    "Server=LAPTOP-3MSVSB2A;" +
+                    "Database=DataWarehouse;" +
+                    "Integrated Security=True;"
+                );
+                warehouseConnection.Open();
+            }
+            catch
+            {
+            }
+
+            cboView.SelectedIndex = 0;
+
+
+
         }
 
         private void btnSearch_Click(object sender, EventArgs e)
@@ -200,16 +219,42 @@ namespace cmpt395project1
             dgvCart.Rows.Clear();
             MessageBox.Show("Cart cleared!", "Success");
         }
+
+        // ----------- Part 2 and Part 3 Stuff ---------------
+        // ---------------------------------------------------
+
+        private void btnRun_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string query = "";
+
+                if (cboView.SelectedIndex == 0)
+                    query = "SELECT * FROM vw_RollUp_University";
+                else if (cboView.SelectedIndex == 1)
+                    query = "SELECT * FROM vw_DrillDown_Dept";
+                else if (cboView.SelectedIndex == 2)
+                    query = "SELECT * FROM vw_ByInstructor";
+                else if (cboView.SelectedIndex == 3)
+                    query = "SELECT * FROM vw_ByDate";
+
+                SqlDataAdapter da = new SqlDataAdapter(query, warehouseConnection);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                dgvResults.DataSource = dt;
+                lblStatus.Text = dt.Rows.Count + " rows returned · " + cboView.SelectedItem.ToString();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message);
+            }
+        }
+
+
     }
 }
 
 
-/*
- * ENROLL TAB NOTES:
- * - Cart data is in dgvCart (in memory)
- * - Each row has StudentID column - filter by this to get the right student's courses
- * - Get student ID from txtEnrollStudentID.Text on Enroll tab
- * - Loop through dgvCart rows where StudentID matches, call RegisterStudent for each
- * - Database connection already set up: use myConnection and myCommand
- * - Stored procedure: EXEC RegisterStudent @StudentID, @SectionID, @RegistrationDate
- */
+
+
