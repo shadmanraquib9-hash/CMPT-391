@@ -1,3 +1,15 @@
+--USE master;
+--GO
+
+--IF DB_ID('Academic_Department_Course') IS NOT NULL
+--BEGIN
+--ALTER DATABASE Academic_Department_Course
+--SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+
+--DROP DATABASE Academic_Department_Course;
+--END
+--GO
+
 --Create database Academic_Department_Course
 go
 use Academic_Department_Course
@@ -64,7 +76,7 @@ Alter table Department
 Add constraint FK_Department_HeadInstructor
 FOREIGN KEY (HeadInstructorID) REFERENCES Instructor(InstructorID);
 
-Create table  ShoppingCart(
+Create table ShoppingCart(
 CartID int identity(1,1) PRIMARY KEY,
 StudentID int,
 SectionID int,

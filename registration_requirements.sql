@@ -113,11 +113,187 @@ END;
 GO
 
 -- =========================================================
--- 5. Drop old procedure if it already exists
+-- 5. Drop old procedures if it already exists
 -- This lets us update and rerun the procedure.
 -- =========================================================
 IF OBJECT_ID('RegisterStudent', 'P') IS NOT NULL
     DROP PROCEDURE RegisterStudent;
+GO
+
+IF OBJECT_ID('AddtoCart', 'P') IS NOT NULL
+    DROP PROCEDURE AddtoCart;
+GO
+
+IF OBJECT_ID('ClearCart', 'P') IS NOT NULL
+    DROP PROCEDURE ClearCart;
+GO
+
+
+-- =========================================================
+-- 5.1. Create Procedure that removes courses from cart.
+-- =========================================================
+CREATE PROCEDURE ClearCart
+(
+    @StudentID INT
+)
+AS
+BEGIN
+    DELETE FROM ShoppingCart
+    WHERE StudentID = @StudentID
+      AND Status = 'Pending';
+END
+GO
+
+-- =========================================================
+-- 5.2. Create Procedure that adds to cart.
+-- This will check for time conflicts and prereqs
+-- =========================================================
+
+CREATE PROCEDURE AddToCart
+(
+    @StudentID INT,
+    @SectionID INT,
+    @Success BIT OUTPUT,
+    @Message VARCHAR(255) OUTPUT
+)
+AS
+BEGIN
+
+    DECLARE @CourseName VARCHAR(100);
+    DECLARE @CourseCode VARCHAR(20);
+
+    ---------------------------------------------------
+    -- Student Exists
+    ---------------------------------------------------
+    IF NOT EXISTS
+    (
+        SELECT *
+        FROM Student
+        WHERE StudentID = @StudentID
+    )
+    BEGIN
+        SET @Success = 0;
+        SET @Message = 'Student does not exist.';
+        RETURN;
+    END
+
+    ---------------------------------------------------
+    -- Section Exists
+    ---------------------------------------------------
+    IF NOT EXISTS
+    (
+        SELECT *
+        FROM Course_sec
+        WHERE SectionID = @SectionID
+    )
+    BEGIN
+        SET @Success = 0;
+        SET @Message = 'Section does not exist.';
+        RETURN;
+    END
+
+    ---------------------------------------------------
+    -- Get Course Info
+    ---------------------------------------------------
+    SELECT
+        @CourseCode = c.CourseCode,
+        @CourseName = c.CourseName
+    FROM Course c
+    JOIN Course_sec cs
+        ON c.CourseID = cs.CourseID
+    WHERE cs.SectionID = @SectionID;
+
+    ---------------------------------------------------
+    -- Already In Cart
+    ---------------------------------------------------
+    IF EXISTS
+    (
+        SELECT *
+        FROM ShoppingCart
+        WHERE StudentID = @StudentID
+          AND SectionID = @SectionID
+          AND Status = 'Pending'
+    )
+    BEGIN
+        SET @Success = 0;
+        SET @Message = 'Course already exists in cart.';
+        RETURN;
+    END
+
+    ---------------------------------------------------
+    -- Prerequisite Check
+    ---------------------------------------------------
+    IF EXISTS
+    (
+        SELECT *
+        FROM Prerequisite p
+        JOIN Course_sec cs
+            ON p.CourseID = cs.CourseID
+        WHERE cs.SectionID = @SectionID
+        AND NOT EXISTS
+        (
+            SELECT *
+            FROM Registration r
+            JOIN Course_sec completed
+                ON r.SectionID = completed.SectionID
+            WHERE r.StudentID = @StudentID
+              AND completed.CourseID = p.PrerequisiteCourseID
+              AND r.Status = 'Completed'
+        )
+    )
+    BEGIN
+        SET @Success = 0;
+        SET @Message =
+            'Prerequisite course has not been completed.';
+        RETURN;
+    END
+
+    ---------------------------------------------------
+    -- Time Conflict Check Against Cart
+    ---------------------------------------------------
+    IF EXISTS
+    (
+        SELECT *
+        FROM ShoppingCart sc
+        JOIN Course_sec existingSec
+            ON sc.SectionID = existingSec.SectionID
+        JOIN Course_sec newSec
+            ON newSec.SectionID = @SectionID
+        WHERE sc.StudentID = @StudentID
+          AND sc.Status = 'Pending'
+          AND existingSec.Term = newSec.Term
+          AND existingSec.Year = newSec.Year
+          AND existingSec.ScheduleDay = newSec.ScheduleDay
+          AND existingSec.StartTime < newSec.EndTime
+          AND newSec.StartTime < existingSec.EndTime
+    )
+    BEGIN
+        SET @Success = 0;
+        SET @Message =
+            'Course conflicts with another course in cart.';
+        RETURN;
+    END
+
+    ---------------------------------------------------
+    -- Add To Cart
+    ---------------------------------------------------
+    INSERT INTO ShoppingCart
+    (
+        StudentID,
+        SectionID,
+        Status
+    )
+    VALUES
+    (
+        @StudentID,
+        @SectionID,
+        'Pending'
+    );
+
+    SET @Success = 1;
+    SET @Message =
+        'Course successfully added to cart.';
+END
 GO
 
 -- =========================================================
@@ -215,55 +391,6 @@ BEGIN
             + ' cannot register in '
             + @CourseCode + ' / ' + @CourseName
             + ' because the course section is full.';
-        RETURN;
-    END;
-
-    -- Check 5: Student cannot register in another section at the same time
-    IF EXISTS (
-        SELECT *
-    FROM Registration r, Course_sec existingSec, Course_sec newSec
-    WHERE r.SectionID = existingSec.SectionID
-        AND newSec.SectionID = @SectionID
-        AND r.StudentID = @StudentID
-        AND r.Status = 'Registered'
-        AND existingSec.Term = newSec.Term
-        AND existingSec.Year = newSec.Year
-        AND existingSec.ScheduleDay = newSec.ScheduleDay
-        AND existingSec.StartTime < newSec.EndTime
-        AND newSec.StartTime < existingSec.EndTime
-    )
-    BEGIN
-        SET @Success = 0;
-        SET @Message = 'Registration failed: '
-            + @StudentName
-            + ' has a schedule conflict for '
-            + @CourseCode + ' / ' + @CourseName
-            + '.';
-        RETURN;
-    END;
-
-    -- Check 6: Student must complete prerequisite courses
-    IF EXISTS (
-        SELECT *
-    FROM Prerequisite p, Course_sec cs
-    WHERE p.CourseID = cs.CourseID
-        AND cs.SectionID = @SectionID
-        AND NOT EXISTS (
-            SELECT *
-        FROM Registration r, Course_sec completed
-        WHERE r.SectionID = completed.SectionID
-            AND r.StudentID = @StudentID
-            AND completed.CourseID = p.PrerequisiteCourseID
-            AND r.Status = 'Completed'
-        )
-    )
-    BEGIN
-        SET @Success = 0;
-        SET @Message = 'Registration failed: '
-            + @StudentName
-            + ' cannot register in '
-            + @CourseCode + ' / ' + @CourseName
-            + ' because the prerequisite course was not completed.';
         RETURN;
     END;
 
@@ -409,3 +536,6 @@ GO
  --JOIN Course c
  --    ON cs.CourseID = c.CourseID
  --WHERE cs.SectionID = 7;
+
+
+ select * from ShoppingCart

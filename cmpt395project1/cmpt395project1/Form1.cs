@@ -24,8 +24,8 @@ namespace cmpt395project1
             try
             {
                 myConnection = new SqlConnection(
-                    "Server=LAPTOP-3MSVSB2A;" +
-                    //"Server=DESKTOP-ACSBV06;" +
+                    //"Server=LAPTOP-3MSVSB2A;" +
+                    "Server=DESKTOP-ACSBV06;" +
                     "Database=Academic_Department_Course;" +
                     "Integrated Security=True;"
                 );
@@ -172,63 +172,92 @@ namespace cmpt395project1
         // adds selected course from search results to cart datagridview, checks for duplicates
         private void btnAddToCart_Click(object sender, EventArgs e)
         {
-
-            // Check student ID is entered before adding to cart
             if (txtStudentID.Text == "")
             {
-                MessageBox.Show("Please enter your Student ID before adding to cart.", "Error");
+                MessageBox.Show("Please enter your Student ID.");
                 return;
             }
 
             if (dgvCourses.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Please select a course to add to cart.", "Error");
+                MessageBox.Show("Please select a course.");
                 return;
             }
 
             DataGridViewRow selectedRow = dgvCourses.SelectedRows[0];
-            string sectionID = selectedRow.Cells["SectionID"].Value.ToString();
 
-            // Check if already in cart
-            foreach (DataGridViewRow row in dgvCart.Rows)
+            int studentID = int.Parse(txtStudentID.Text);
+            int sectionID = int.Parse(selectedRow.Cells["SectionID"].Value.ToString());
+
+            try
             {
-                if (row.Cells["SectionID"].Value != null &&
-                    row.Cells["SectionID"].Value.ToString() == sectionID)
+                myCommand.Parameters.Clear();
+
+                myCommand.CommandText = "AddToCart";
+                myCommand.CommandType = CommandType.StoredProcedure;
+
+                myCommand.Parameters.AddWithValue("@StudentID", studentID);
+                myCommand.Parameters.AddWithValue("@SectionID", sectionID);
+
+                SqlParameter successParam =
+                    new SqlParameter("@Success", SqlDbType.Bit);
+                successParam.Direction = ParameterDirection.Output;
+                myCommand.Parameters.Add(successParam);
+
+                SqlParameter messageParam =
+                    new SqlParameter("@Message", SqlDbType.VarChar, 255);
+                messageParam.Direction = ParameterDirection.Output;
+                myCommand.Parameters.Add(messageParam);
+
+                myCommand.ExecuteNonQuery();
+
+                bool success = Convert.ToBoolean(successParam.Value);
+                string message = messageParam.Value.ToString();
+
+                if (success)
                 {
-                    MessageBox.Show("This course is already in your cart.", "Warning");
-                    return;
+                    dgvCart.Rows.Add(
+                        txtStudentID.Text,
+                        sectionID,
+                        selectedRow.Cells["CourseCode"].Value.ToString(),
+                        selectedRow.Cells["CourseName"].Value.ToString(),
+                        selectedRow.Cells["Instructor"].Value.ToString(),
+                        selectedRow.Cells["Day"].Value.ToString(),
+                        selectedRow.Cells["StartTime"].Value.ToString(),
+                        selectedRow.Cells["EndTime"].Value.ToString()
+                    );
                 }
+
+                MessageBox.Show(message);
+
+                myCommand.CommandType = CommandType.Text;
             }
-
-            dgvCart.Rows.Add(
-                txtStudentID.Text,
-                sectionID,
-                selectedRow.Cells["CourseCode"].Value.ToString(),
-                selectedRow.Cells["CourseName"].Value.ToString(),
-                selectedRow.Cells["Instructor"].Value.ToString(),
-                selectedRow.Cells["Day"].Value.ToString(),
-                selectedRow.Cells["StartTime"].Value.ToString(),
-                selectedRow.Cells["EndTime"].Value.ToString()
-            );
-
-
-            MessageBox.Show("Course added to cart!", "Success");
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         // clears all courses from cart datagridview
         private void btnClearCart_Click(object sender, EventArgs e)
         {
-            string studentID = txtStudentID.Text;
-            // Remove only rows that match the current student ID
-            for (int i = dgvCart.Rows.Count - 1; i >= 0; i--)
-            {
-                if (dgvCart.Rows[i].Cells["StudentID"].Value != null &&
-                    dgvCart.Rows[i].Cells["StudentID"].Value.ToString() == studentID)
-                {
-                    dgvCart.Rows.RemoveAt(i);
-                }
-            }
-            MessageBox.Show("Your cart has been cleared!", "Success");
+            myCommand.Parameters.Clear();
+
+            myCommand.CommandText = "ClearCart";
+            myCommand.CommandType = CommandType.StoredProcedure;
+
+            myCommand.Parameters.AddWithValue(
+                "@StudentID",
+                int.Parse(txtStudentID.Text)
+            );
+
+            myCommand.ExecuteNonQuery();
+
+            myCommand.CommandType = CommandType.Text;
+
+            // Clear the grid
+            dgvCart.Rows.Clear();
+            MessageBox.Show("Cart cleared!", "Success");
         }
 
         private void btnRegister_Click_1(object sender, EventArgs e)
@@ -358,15 +387,3 @@ namespace cmpt395project1
         }
     }
 }
-
-
-/*
- * ENROLL TAB NOTES:
- * - Cart data is in dgvCart (in memory)
- * - Each row has StudentID column - filter by this to get the right student's courses
- * - Get student ID from txtEnrollStudentID.Text on Enroll tab
- * - Loop through dgvCart rows where StudentID matches, call RegisterStudent for each
- * - Database connection already set up: use myConnection and myCommand
- * - Stored procedure: EXEC RegisterStudent @StudentID, @SectionID, @RegistrationDate
- */
-
