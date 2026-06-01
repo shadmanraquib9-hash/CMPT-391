@@ -42,6 +42,7 @@
             this.lblTerm = new System.Windows.Forms.Label();
             this.lblStudentID = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.EnrolSearch = new System.Windows.Forms.Button();
             this.dgvEnrolled = new System.Windows.Forms.DataGridView();
             this.btnRegister = new System.Windows.Forms.Button();
             this.txtEnrollStudentID = new System.Windows.Forms.TextBox();
@@ -172,6 +173,7 @@
             this.txtStudentID.Name = "txtStudentID";
             this.txtStudentID.Size = new System.Drawing.Size(100, 20);
             this.txtStudentID.TabIndex = 3;
+            this.txtStudentID.TextChanged += new System.EventHandler(this.txtStudentID_TextChanged);
             // 
             // lblYear
             // 
@@ -203,6 +205,7 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.EnrolSearch);
             this.tabPage2.Controls.Add(this.dgvEnrolled);
             this.tabPage2.Controls.Add(this.btnRegister);
             this.tabPage2.Controls.Add(this.txtEnrollStudentID);
@@ -214,6 +217,16 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Enroll";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // EnrolSearch
+            // 
+            this.EnrolSearch.Location = new System.Drawing.Point(366, 48);
+            this.EnrolSearch.Name = "EnrolSearch";
+            this.EnrolSearch.Size = new System.Drawing.Size(75, 23);
+            this.EnrolSearch.TabIndex = 4;
+            this.EnrolSearch.Text = "Search";
+            this.EnrolSearch.UseVisualStyleBackColor = true;
+            this.EnrolSearch.Click += new System.EventHandler(this.EnrolSearch_Click);
             // 
             // dgvEnrolled
             // 
@@ -234,6 +247,7 @@
             this.btnRegister.TabIndex = 2;
             this.btnRegister.Text = "Register";
             this.btnRegister.UseVisualStyleBackColor = true;
+            this.btnRegister.Click += new System.EventHandler(this.btnRegister_Click_1);
             // 
             // txtEnrollStudentID
             // 
@@ -363,6 +377,7 @@
         private System.Windows.Forms.Button btnClearCart;
         private System.Windows.Forms.DataGridView dgvCart;
         private System.Windows.Forms.Button btnAddToCart;
+        private System.Windows.Forms.Button EnrolSearch;
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Button btnUpload;

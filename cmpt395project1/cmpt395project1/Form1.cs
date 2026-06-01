@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;  
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data.SqlClient;  
 
 namespace cmpt395project1
 {
@@ -21,11 +21,12 @@ namespace cmpt395project1
         public Form1()
         {
             InitializeComponent();
-
+            
             try
             {
                 myConnection = new SqlConnection(
                     "Server=LAPTOP-3MSVSB2A;" +
+                    //"Server=DESKTOP-ACSBV06;" +
                     "Database=Academic_Department_Course;" +
                     "Integrated Security=True;"
                 );
@@ -119,6 +120,15 @@ namespace cmpt395project1
             dgvCart.Columns.Add("Day", "Day");
             dgvCart.Columns.Add("StartTime", "Start Time");
             dgvCart.Columns.Add("EndTime", "End Time");
+
+            dgvEnrolled.Columns.Add("StudentID", "Student ID");
+            dgvEnrolled.Columns.Add("SectionID", "Section ID");
+            dgvEnrolled.Columns.Add("CourseCode", "Course Code");
+            dgvEnrolled.Columns.Add("CourseName", "Course Name");
+            dgvEnrolled.Columns.Add("Instructor", "Instructor");
+            dgvEnrolled.Columns.Add("Day", "Day");
+            dgvEnrolled.Columns.Add("StartTime", "Start Time");
+            dgvEnrolled.Columns.Add("EndTime", "End Time");
         }
 
         // main search function, queries database for courses matching selected term and year, displays results in datagridview
@@ -179,6 +189,16 @@ namespace cmpt395project1
             {
                 MessageBox.Show(ex.ToString(), "Error");
             }
+
+            // Show only current student's cart
+            foreach (DataGridViewRow row in dgvCart.Rows)
+            {
+                if (!row.IsNewRow)
+                {
+                    row.Visible = row.Cells["StudentID"].Value != null &&
+                                  row.Cells["StudentID"].Value.ToString() == txtStudentID.Text;
+                }
+            }
         }
 
         // adds selected course from search results to cart datagridview, checks for duplicates
@@ -223,14 +243,150 @@ namespace cmpt395project1
                 selectedRow.Cells["EndTime"].Value.ToString()
             );
 
+
             MessageBox.Show("Course added to cart!", "Success");
         }
 
         // clears all courses from cart datagridview
         private void btnClearCart_Click(object sender, EventArgs e)
         {
-            dgvCart.Rows.Clear();
-            MessageBox.Show("Cart cleared!", "Success");
+            string studentID = txtStudentID.Text;
+            // Remove only rows that match the current student ID
+            for (int i = dgvCart.Rows.Count - 1; i >= 0; i--)
+            {
+                if (dgvCart.Rows[i].Cells["StudentID"].Value != null &&
+                    dgvCart.Rows[i].Cells["StudentID"].Value.ToString() == studentID)
+                {
+                    dgvCart.Rows.RemoveAt(i);
+                }
+            }
+            MessageBox.Show("Your cart has been cleared!", "Success");
+        }
+
+        private void btnRegister_Click_1(object sender, EventArgs e)
+        {
+            // Make sure user selected a course
+            if (dgvEnrolled.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Please select a course to enroll in.");
+                return;
+            }
+
+            try
+            {
+                // Get selected row
+                DataGridViewRow selectedRow = dgvEnrolled.SelectedRows[0];
+
+                int studentID = int.Parse(
+                    selectedRow.Cells["StudentID"].Value.ToString()
+                );
+
+                int sectionID = int.Parse(
+                    selectedRow.Cells["SectionID"].Value.ToString()
+                );
+
+                // Clear old parameters
+                myCommand.Parameters.Clear();
+
+                // Stored procedure setup
+                myCommand.CommandText = "RegisterStudent";
+                myCommand.CommandType = CommandType.StoredProcedure;
+
+                // INPUT parameters
+                myCommand.Parameters.AddWithValue("@StudentID", studentID);
+                myCommand.Parameters.AddWithValue("@SectionID", sectionID);
+                myCommand.Parameters.AddWithValue("@RegistrationDate", DateTime.Now);
+
+                // OUTPUT parameter: Success
+                SqlParameter successParam =
+                    new SqlParameter("@Success", SqlDbType.Bit);
+
+                successParam.Direction = ParameterDirection.Output;
+
+                myCommand.Parameters.Add(successParam);
+
+                // OUTPUT parameter: Message
+                SqlParameter messageParam =
+                    new SqlParameter("@Message", SqlDbType.VarChar, 255);
+
+                messageParam.Direction = ParameterDirection.Output;
+
+                myCommand.Parameters.Add(messageParam);
+
+                // Execute stored procedure
+                myCommand.ExecuteNonQuery();
+
+                // Read OUTPUT values
+                bool success = Convert.ToBoolean(successParam.Value);
+
+                string message = messageParam.Value.ToString();
+
+                // Show SQL message
+                MessageBox.Show(message);
+
+                // Reset command type
+                myCommand.CommandType = CommandType.Text;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error");
+            }
+        }
+
+        private void EnrolSearch_Click(object sender, EventArgs e)
+        {
+            dgvEnrolled.Rows.Clear();
+
+            string studentID = txtEnrollStudentID.Text;
+
+            if (studentID == "")
+            {
+                MessageBox.Show("Please enter a Student ID.", "Error");
+                return;
+            }
+
+            bool found = false;
+
+            foreach (DataGridViewRow row in dgvCart.Rows)
+            {
+                if (row.Cells["StudentID"].Value != null &&
+                    row.Cells["StudentID"].Value.ToString() == studentID)
+                {
+                    dgvEnrolled.Rows.Add(
+                        row.Cells["StudentID"].Value.ToString(),
+                        row.Cells["SectionID"].Value.ToString(),
+                        row.Cells["CourseCode"].Value.ToString(),
+                        row.Cells["CourseName"].Value.ToString(),
+                        row.Cells["Instructor"].Value.ToString(),
+                        row.Cells["Day"].Value.ToString(),
+                        row.Cells["StartTime"].Value.ToString(),
+                        row.Cells["EndTime"].Value.ToString()
+                    );
+
+                    found = true;
+                }
+            }
+
+            if (!found)
+            {
+                MessageBox.Show("No courses found for this student.", "Info");
+            }
+        }
+
+        private void txtStudentID_TextChanged(object sender, EventArgs e)
+        {
+            // clears search whenever student ID is changed, forces user to click search again to see courses for new student ID, also clears cart and enrolled datagridviews to prevent confusion
+            dgvCourses.Rows.Clear();
+            dgvCourses.Columns.Clear();
+            // whenever a new studentid is input, show only that student's cart items instantly
+            foreach (DataGridViewRow row in dgvCart.Rows)
+            {
+                if (!row.IsNewRow)
+                {
+                    row.Visible = row.Cells["StudentID"].Value != null &&
+                                  row.Cells["StudentID"].Value.ToString() == txtStudentID.Text;
+                }
+            }
         }
 
         // ----------- Part 2 and Part 3 Stuff ---------------
@@ -299,6 +455,7 @@ namespace cmpt395project1
         }
     }
 }
+
 
 
 

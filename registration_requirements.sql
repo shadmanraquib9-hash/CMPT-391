@@ -17,6 +17,7 @@
 
 --CREATE DATABASE Academic_Department_Course;
 --GO
+
 USE Academic_Department_Course;
 GO
 -- =========================================================
@@ -123,10 +124,13 @@ GO
 -- 6. Create procedure to register a student
 -- This checks requirements before inserting into Registration.
 -- =========================================================
+
 CREATE PROCEDURE RegisterStudent
     @StudentID INT,
     @SectionID INT,
-    @RegistrationDate DATE
+    @RegistrationDate DATE,
+    @Success BIT OUTPUT,
+    @Message VARCHAR(255) OUTPUT
 AS
 BEGIN
     DECLARE @StudentName VARCHAR(100);
@@ -140,7 +144,8 @@ BEGIN
     WHERE StudentID = @StudentID
     )
     BEGIN
-        PRINT 'Registration failed: StudentID '
+        SET @Success = 0;
+        SET @Message = 'Registration failed: StudentID '
             + CAST(@StudentID AS VARCHAR(10))
             + ' does not exist.';
         RETURN;
@@ -158,7 +163,8 @@ BEGIN
     WHERE SectionID = @SectionID
     )
     BEGIN
-        PRINT 'Registration failed for '
+        SET @Success = 0;
+        SET @Message = 'Registration failed for '
             + @StudentName
             + ': SectionID '
             + CAST(@SectionID AS VARCHAR(10))
@@ -183,7 +189,8 @@ BEGIN
         AND Status = 'Registered'
     )
     BEGIN
-        PRINT 'Registration failed: '
+        SET @Success = 0;
+        SET @Message = 'Registration failed: '
             + @StudentName
             + ' is already registered in '
             + @CourseCode + ' / ' + @CourseName
@@ -202,7 +209,8 @@ BEGIN
     WHERE SectionID = @SectionID
     )
     BEGIN
-        PRINT 'Registration failed: '
+        SET @Success = 0;
+        SET @Message = 'Registration failed: '
             + @StudentName
             + ' cannot register in '
             + @CourseCode + ' / ' + @CourseName
@@ -225,7 +233,8 @@ BEGIN
         AND newSec.StartTime < existingSec.EndTime
     )
     BEGIN
-        PRINT 'Registration failed: '
+        SET @Success = 0;
+        SET @Message = 'Registration failed: '
             + @StudentName
             + ' has a schedule conflict for '
             + @CourseCode + ' / ' + @CourseName
@@ -249,7 +258,8 @@ BEGIN
         )
     )
     BEGIN
-        PRINT 'Registration failed: '
+        SET @Success = 0;
+        SET @Message = 'Registration failed: '
             + @StudentName
             + ' cannot register in '
             + @CourseCode + ' / ' + @CourseName
@@ -263,7 +273,8 @@ BEGIN
     VALUES
         (@StudentID, @SectionID, @RegistrationDate, 'Registered');
 
-    PRINT 'Registration successful: '
+    SET @Success = 1;
+    SET @Message = 'Registration successful: '
         + @StudentName
         + ' registered for '
         + @CourseCode + ' / ' + @CourseName
@@ -284,117 +295,117 @@ GO
 -- -- TEST SETUP: Add completed prerequisite for Alex Taylor
 -- -- Alex completed CS101, so he can register in MTH201.
 -- -- =========================================================
--- IF NOT EXISTS (
---     SELECT *
---     FROM Registration
---     WHERE StudentID = 1
---     AND SectionID = 1
---     AND Status = 'Completed'
--- )
--- BEGIN
---     INSERT INTO Registration (StudentID, SectionID, RegistrationDate, Status)
---     VALUES (1, 1, '2026-08-01', 'Completed');
--- END;
--- GO
+ --IF NOT EXISTS (
+ --    SELECT *
+ --    FROM Registration
+ --    WHERE StudentID = 1
+ --    AND SectionID = 1
+ --    AND Status = 'Completed'
+ --)
+ --BEGIN
+ --    INSERT INTO Registration (StudentID, SectionID, RegistrationDate, Status)
+ --    VALUES (1, 1, '2026-08-01', 'Completed');
+ --END;
+ --GO
 
 -- -- TEST CASE 1: Successful registration
--- EXEC RegisterStudent 1, 2, '2026-09-10';
--- GO
+ --EXEC RegisterStudent 1, 2, '2026-09-10';
+ --GO
 
 -- -- TEST CASE 2: Failed prerequisite
--- EXEC RegisterStudent 2, 4, '2026-09-10';
--- GO
+ --EXEC RegisterStudent 2, 4, '2026-09-10';
+ --GO
 
 -- -- TEST CASE 3: Student does not exist
--- EXEC RegisterStudent 99, 2, '2026-09-10';
--- GO
+ --EXEC RegisterStudent 99, 2, '2026-09-10';
+ --GO
 
 -- -- TEST CASE 4: Section does not exist
--- EXEC RegisterStudent 1, 99, '2026-09-10';
--- GO
+ --EXEC RegisterStudent 1, 99, '2026-09-10';
+ --GO
 
 -- -- =========================================================
 -- -- TEST SETUP: Schedule conflict section
 -- -- This creates a new section at the same time as Alex's CS101.
 -- -- =========================================================
--- INSERT INTO Course_sec
--- (CourseID, InstructorID, Term, Year, ScheduleDay, StartTime, EndTime, Capacity)
--- VALUES
--- (1, 1, 'Fall', 2026, 'Monday', '09:00', '10:30', 20);
--- GO
+ --INSERT INTO Course_sec
+ --(CourseID, InstructorID, Term, Year, ScheduleDay, StartTime, EndTime, Capacity)
+ --VALUES
+ --(1, 1, 'Fall', 2026, 'Monday', '09:00', '10:30', 20);
+ --GO
 
 -- -- TEST CASE 5: Schedule conflict
--- EXEC RegisterStudent 1, 6, '2026-09-10';
--- GO
+ --EXEC RegisterStudent 1, 6, '2026-09-10';
+ --GO
 
 
 -- -- TEST CASE 6: Duplicate registration
--- EXEC RegisterStudent 1, 2, '2026-09-11';
--- GO
+ --EXEC RegisterStudent 1, 2, '2026-09-11';
+ --GO
 
 
 -- -- =========================================================
 -- -- TEST SETUP: Capacity test section
 -- -- CS101 has no prerequisite, no conflict, and capacity = 1.
 -- -- =========================================================
--- INSERT INTO Course_sec
--- (CourseID, InstructorID, Term, Year, ScheduleDay, StartTime, EndTime, Capacity)
--- VALUES
--- (1, 1, 'Spring', 2027, 'Monday', '08:00', '09:00', 1);
--- GO
+ --INSERT INTO Course_sec
+ --(CourseID, InstructorID, Term, Year, ScheduleDay, StartTime, EndTime, Capacity)
+ --VALUES
+ --(1, 1, 'Spring', 2027, 'Monday', '08:00', '09:00', 1);
+ --GO
 
 -- -- TEST CASE 7A: Fill capacity
--- EXEC RegisterStudent 2, 7, '2027-03-01';
--- GO
+ --EXEC RegisterStudent 2, 7, '2027-03-01';
+ --GO
 
 -- -- TEST CASE 7B: Section full
--- EXEC RegisterStudent 3, 7, '2027-03-02';
--- GO
+ --EXEC RegisterStudent 3, 7, '2027-03-02';
+ --GO
 
 -- -- =========================================================
 -- -- View registration results with student and course names
 -- -- =========================================================
--- SELECT
---     r.RegistrationID,
---     s.FirstName + ' ' + s.LastName AS StudentName,
---     c.CourseCode,
---     c.CourseName,
---     cs.Term,
---     cs.Year,
---     cs.ScheduleDay,
---     cs.StartTime,
---     cs.EndTime,
---     r.RegistrationDate,
---     r.Status
--- FROM Registration r, Student s, Course_sec cs, Course c
--- WHERE r.StudentID = s.StudentID
--- AND r.SectionID = cs.SectionID
--- AND cs.CourseID = c.CourseID;
--- GO
+ --SELECT
+ --    r.RegistrationID,
+ --    s.FirstName + ' ' + s.LastName AS StudentName,
+ --    c.CourseCode,
+ --    c.CourseName,
+ --    cs.Term,
+ --    cs.Year,
+ --    cs.ScheduleDay,
+ --    cs.StartTime,
+ --    cs.EndTime,
+ --    r.RegistrationDate,
+ --    r.Status
+ --FROM Registration r, Student s, Course_sec cs, Course c
+ --WHERE r.StudentID = s.StudentID
+ --AND r.SectionID = cs.SectionID
+ --AND cs.CourseID = c.CourseID;
+ --GO
 
--- SELECT
---     c.CourseCode,
---     c.CourseName,
---     pc.CourseCode AS PrerequisiteCode,
---     pc.CourseName AS PrerequisiteName
--- FROM Prerequisite p,
---      Course c,
---      Course pc
--- WHERE p.CourseID = c.CourseID
--- AND p.PrerequisiteCourseID = pc.CourseID;
--- GO
+ --SELECT
+ --    c.CourseCode,
+ --    c.CourseName,
+ --    pc.CourseCode AS PrerequisiteCode,
+ --    pc.CourseName AS PrerequisiteName
+ --FROM Prerequisite p,
+ --     Course c,
+ --     Course pc
+ --WHERE p.CourseID = c.CourseID
+ --AND p.PrerequisiteCourseID = pc.CourseID;
+ --GO
 
--- SELECT *
--- FROM Course_sec;
+ --SELECT *
+ --FROM Course_sec;
 
 
--- SELECT
---     cs.SectionID,
---     cs.CourseID,
---     c.CourseCode,
---     c.CourseName,
---     cs.Capacity
--- FROM Course_sec cs
--- JOIN Course c
---     ON cs.CourseID = c.CourseID
--- WHERE cs.SectionID = 7;
+ --SELECT
+ --    cs.SectionID,
+ --    cs.CourseID,
+ --    c.CourseCode,
+ --    c.CourseName,
+ --    cs.Capacity
+ --FROM Course_sec cs
+ --JOIN Course c
+ --    ON cs.CourseID = c.CourseID
+ --WHERE cs.SectionID = 7;
