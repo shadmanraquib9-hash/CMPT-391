@@ -47,11 +47,11 @@
             this.txtEnrollStudentID = new System.Windows.Forms.TextBox();
             this.lblEnrollStudentID = new System.Windows.Forms.Label();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.cboView = new System.Windows.Forms.ComboBox();
-            this.dgvResults = new System.Windows.Forms.DataGridView();
-            this.btnRun = new System.Windows.Forms.Button();
-            this.btnUpload = new System.Windows.Forms.Button();
             this.lblStatus = new System.Windows.Forms.Label();
+            this.btnUpload = new System.Windows.Forms.Button();
+            this.btnRun = new System.Windows.Forms.Button();
+            this.dgvResults = new System.Windows.Forms.DataGridView();
+            this.cboView = new System.Windows.Forms.ComboBox();
             this.DataWarehouse.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCart)).BeginInit();
@@ -266,54 +266,58 @@
             this.tabPage3.Text = "DataWarehouse";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // cboView
+            // lblStatus
             // 
-            this.cboView.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboView.FormattingEnabled = true;
-            this.cboView.Items.AddRange(new object[] {
-            "Roll-up by university",
-            "Drill-Down by department",
-            "By instructor",
-            "By semester / year"});
-            this.cboView.Location = new System.Drawing.Point(16, 40);
-            this.cboView.Name = "cboView";
-            this.cboView.Size = new System.Drawing.Size(121, 21);
-            this.cboView.TabIndex = 0;
-            // 
-            // dgvResults
-            // 
-            this.dgvResults.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvResults.Location = new System.Drawing.Point(16, 144);
-            this.dgvResults.Name = "dgvResults";
-            this.dgvResults.Size = new System.Drawing.Size(736, 200);
-            this.dgvResults.TabIndex = 1;
-            // 
-            // btnRun
-            // 
-            this.btnRun.Location = new System.Drawing.Point(584, 56);
-            this.btnRun.Name = "btnRun";
-            this.btnRun.Size = new System.Drawing.Size(75, 23);
-            this.btnRun.TabIndex = 2;
-            this.btnRun.Text = "Run Query";
-            this.btnRun.UseVisualStyleBackColor = true;
+            this.lblStatus.AutoSize = true;
+            this.lblStatus.Location = new System.Drawing.Point(136, 48);
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(0, 13);
+            this.lblStatus.TabIndex = 4;
             // 
             // btnUpload
             // 
-            this.btnUpload.Location = new System.Drawing.Point(672, 56);
+            this.btnUpload.Location = new System.Drawing.Point(584, 272);
             this.btnUpload.Name = "btnUpload";
             this.btnUpload.Size = new System.Drawing.Size(75, 23);
             this.btnUpload.TabIndex = 3;
             this.btnUpload.Text = "Upload XML";
             this.btnUpload.UseVisualStyleBackColor = true;
             // 
-            // lblStatus
+            // btnRun
             // 
-            this.lblStatus.AutoSize = true;
-            this.lblStatus.Location = new System.Drawing.Point(16, 24);
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(35, 13);
-            this.lblStatus.TabIndex = 4;
-            this.lblStatus.Text = "label1";
+            this.btnRun.Location = new System.Drawing.Point(584, 152);
+            this.btnRun.Name = "btnRun";
+            this.btnRun.Size = new System.Drawing.Size(75, 23);
+            this.btnRun.TabIndex = 2;
+            this.btnRun.Text = "Run Query";
+            this.btnRun.UseVisualStyleBackColor = true;
+            this.btnRun.Click += new System.EventHandler(this.btnRun_Click_1);
+            // 
+            // dgvResults
+            // 
+            this.dgvResults.AllowUserToResizeRows = false;
+            this.dgvResults.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvResults.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvResults.Location = new System.Drawing.Point(128, 152);
+            this.dgvResults.Name = "dgvResults";
+            this.dgvResults.Size = new System.Drawing.Size(392, 200);
+            this.dgvResults.TabIndex = 1;
+            // 
+            // cboView
+            // 
+            this.cboView.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboView.FormattingEnabled = true;
+            this.cboView.Items.AddRange(new object[] {
+            "Roll-up by university",
+            "Roll-up by faculty",
+            "Drill-Down by department",
+            "Drill-down by time",
+            "By instructor",
+            "By student major"});
+            this.cboView.Location = new System.Drawing.Point(136, 72);
+            this.cboView.Name = "cboView";
+            this.cboView.Size = new System.Drawing.Size(121, 21);
+            this.cboView.TabIndex = 0;
             // 
             // Form1
             // 
