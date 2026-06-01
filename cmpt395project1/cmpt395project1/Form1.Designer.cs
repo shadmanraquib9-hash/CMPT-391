@@ -296,6 +296,7 @@
             this.btnUpload.TabIndex = 3;
             this.btnUpload.Text = "Upload XML";
             this.btnUpload.UseVisualStyleBackColor = true;
+            this.btnUpload.Click += new System.EventHandler(this.btnUpload_Click);
             // 
             // btnRun
             // 

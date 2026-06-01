@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace cmpt395project1
 {
@@ -484,6 +485,381 @@ namespace cmpt395project1
                                   row.Cells["StudentID"].Value.ToString() == txtStudentID.Text;
                 }
             }
+        }
+
+        // checks date and uploads XML
+        private void btnUpload_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+
+            ofd.Filter = "XML Files (*.xml)|*.xml";
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                string fileName =
+                    System.IO.Path.GetFileNameWithoutExtension(ofd.FileName);
+
+                if (!fileName.Contains("_"))
+                {
+                    MessageBox.Show(
+                        "XML file must contain upload date suffix.",
+                        "Invalid File");
+
+                    return;
+                }
+
+                LoadXMLToWarehouse(ofd.FileName);
+            }
+        }
+        // take all the data and store it
+        private void LoadXMLToWarehouse(string xmlFile)
+        {
+            XmlDocument doc = new XmlDocument();
+
+            doc.Load(xmlFile);
+
+            XmlNodeList offerings =
+                doc.SelectNodes("//CourseOffering");
+
+            foreach (XmlNode offering in offerings)
+            {
+                string university =
+                    offering["University"].InnerText;
+
+                string faculty =
+                    offering["Faculty"].InnerText;
+
+                string department =
+                    offering["Department"].InnerText;
+
+                string courseCode =
+                    offering["CourseCode"].InnerText;
+
+                string courseName =
+                    offering["CourseName"].InnerText;
+
+                string instructor =
+                    offering["Instructor"].InnerText;
+
+                string student =
+                    offering["Student"].InnerText;
+
+                string major =
+                    offering["Major"].InnerText;
+
+                int year =
+                    Convert.ToInt32(offering["Year"].InnerText);
+
+                string semester =
+                    offering["Semester"].InnerText;
+
+                InsertCourseDimension(
+                    university,
+                    faculty,
+                    department,
+                    courseCode,
+                    courseName);
+
+                InsertInstructorDimension(
+                    instructor);
+
+                InsertStudentDimension(
+                    student,
+                    major);
+
+                InsertDateDimension(
+                    year,
+                    semester);
+
+                InsertFactRecord(
+                    university,
+                    courseCode,
+                    instructor,
+                    student,
+                    year,
+                    semester);
+            }
+
+            MessageBox.Show("ETL Upload Complete");
+        }
+
+        // Insertions for each field
+        private int InsertCourseDimension(
+            string university,
+            string faculty,
+            string department,
+            string courseCode,
+            string courseName)
+        {
+            SqlCommand cmd =
+                new SqlCommand(
+                @"IF NOT EXISTS
+        (
+            SELECT *
+            FROM DimCourse
+            WHERE CourseCode=@CourseCode
+        )
+        BEGIN
+            INSERT INTO DimCourse
+            (
+                University,
+                Faculty,
+                Department,
+                CourseCode,
+                CourseName
+            )
+            VALUES
+            (
+                @University,
+                @Faculty,
+                @Department,
+                @CourseCode,
+                @CourseName
+            )
+        END",
+                warehouseConnection);
+
+            cmd.Parameters.AddWithValue(
+                "@University",
+                university);
+
+            cmd.Parameters.AddWithValue(
+                "@Faculty",
+                faculty);
+
+            cmd.Parameters.AddWithValue(
+                "@Department",
+                department);
+
+            cmd.Parameters.AddWithValue(
+                "@CourseCode",
+                courseCode);
+
+            cmd.Parameters.AddWithValue(
+                "@CourseName",
+                courseName);
+
+            cmd.ExecuteNonQuery();
+
+            return 0;
+        }
+
+        private int InsertInstructorDimension(
+            string instructorName)
+        {
+            SqlCommand cmd = new SqlCommand(
+            @"IF NOT EXISTS
+      (
+          SELECT *
+          FROM DimInstructor
+          WHERE InstructorName=@InstructorName
+      )
+      BEGIN
+          INSERT INTO DimInstructor
+          (
+              InstructorName
+          )
+          VALUES
+          (
+              @InstructorName
+          )
+      END",
+              warehouseConnection);
+
+            cmd.Parameters.AddWithValue(
+                "@InstructorName",
+                instructorName);
+
+            cmd.ExecuteNonQuery();
+
+            return 0;
+        }
+
+        private int InsertStudentDimension(
+            string studentName,
+            string major)
+        {
+            SqlCommand cmd = new SqlCommand(
+            @"IF NOT EXISTS
+      (
+          SELECT *
+          FROM DimStudent
+          WHERE StudentName=@StudentName
+      )
+      BEGIN
+          INSERT INTO DimStudent
+          (
+              StudentName,
+              Major
+          )
+          VALUES
+          (
+              @StudentName,
+              @Major
+          )
+      END",
+              warehouseConnection);
+
+            cmd.Parameters.AddWithValue(
+                "@StudentName",
+                studentName);
+
+            cmd.Parameters.AddWithValue(
+                "@Major",
+                major);
+
+            cmd.ExecuteNonQuery();
+
+            return 0;
+        }
+
+        private int InsertDateDimension(
+            int year,
+            string semester)
+        {
+            SqlCommand cmd = new SqlCommand(
+            @"IF NOT EXISTS
+      (
+          SELECT *
+          FROM DimDate
+          WHERE Year=@Year
+          AND Semester=@Semester
+      )
+      BEGIN
+          INSERT INTO DimDate
+          (
+              Year,
+              Semester
+          )
+          VALUES
+          (
+              @Year,
+              @Semester
+          )
+      END",
+              warehouseConnection);
+
+            cmd.Parameters.AddWithValue(
+                "@Year",
+                year);
+
+            cmd.Parameters.AddWithValue(
+                "@Semester",
+                semester);
+
+            cmd.ExecuteNonQuery();
+
+            return 0;
+        }
+
+        private void InsertFactRecord(
+            string university,
+            string courseCode,
+            string instructorName,
+            string studentName,
+            int year,
+            string semester)
+        {
+            int courseKey = GetCourseKey(courseCode);
+
+            int instructorKey =
+                GetInstructorKey(instructorName);
+
+            int studentKey =
+                GetStudentKey(studentName);
+
+            int dateKey =
+                GetDateKey(year, semester);
+
+            SqlCommand cmd =
+                new SqlCommand(
+                @"INSERT INTO FactCourseOffering
+          (
+              CourseKey,
+              InstructorKey,
+              StudentKey,
+              DateKey
+          )
+          VALUES
+          (
+              @CourseKey,
+              @InstructorKey,
+              @StudentKey,
+              @DateKey
+          )",
+                  warehouseConnection);
+
+            cmd.Parameters.AddWithValue(
+                "@CourseKey",
+                courseKey);
+
+            cmd.Parameters.AddWithValue(
+                "@InstructorKey",
+                instructorKey);
+
+            cmd.Parameters.AddWithValue(
+                "@StudentKey",
+                studentKey);
+
+            cmd.Parameters.AddWithValue(
+                "@DateKey",
+                dateKey);
+
+            cmd.ExecuteNonQuery();
+        }
+
+
+        // Gets the keys for each field
+        private int GetCourseKey(string courseCode)
+        {
+            SqlCommand cmd = new SqlCommand(
+                "SELECT CourseKey " +
+                "FROM DimCourse " +
+                "WHERE CourseCode = @CourseCode",
+                warehouseConnection);
+
+            cmd.Parameters.AddWithValue("@CourseCode", courseCode);
+
+            return Convert.ToInt32(cmd.ExecuteScalar());
+        }
+
+        private int GetInstructorKey(string instructorName)
+        {
+            SqlCommand cmd = new SqlCommand(
+                "SELECT InstructorKey " +
+                "FROM DimInstructor " +
+                "WHERE InstructorName = @InstructorName",
+                warehouseConnection);
+
+            cmd.Parameters.AddWithValue("@InstructorName", instructorName);
+
+            return Convert.ToInt32(cmd.ExecuteScalar());
+        }
+        private int GetStudentKey(string studentName)
+        {
+            SqlCommand cmd = new SqlCommand(
+                "SELECT StudentKey " +
+                "FROM DimStudent " +
+                "WHERE StudentName = @StudentName",
+                warehouseConnection);
+
+            cmd.Parameters.AddWithValue("@StudentName", studentName);
+
+            return Convert.ToInt32(cmd.ExecuteScalar());
+        }
+        private int GetDateKey(int year, string semester)
+        {
+            SqlCommand cmd = new SqlCommand(
+                @"SELECT DateKey
+                FROM DimDate
+                WHERE Year = @Year
+                AND Semester = @Semester",
+                warehouseConnection);
+
+            cmd.Parameters.AddWithValue("@Year", year);
+            cmd.Parameters.AddWithValue("@Semester", semester);
+
+            return Convert.ToInt32(cmd.ExecuteScalar());
         }
     }
    }
