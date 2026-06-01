@@ -1,0 +1,14 @@
+<CourseOfferings>
+  <CourseOffering>
+    <University>MacEwan University</University>
+    <Faculty>Science</Faculty>
+    <Department>Computing Science</Department>
+    <CourseCode>CMPUT391</CourseCode>
+    <CourseName>Database Systems</CourseName>
+    <Instructor>Mohamad El-Hajj</Instructor>
+    <Student>Ethan Bernard</Student>
+    <Major>Computer Science</Major>
+    <Year>2026</Year>
+    <Semester>Spring</Semester>
+  </CourseOffering>
+</CourseOfferings>

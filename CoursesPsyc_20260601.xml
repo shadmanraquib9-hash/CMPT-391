@@ -1,0 +1,14 @@
+<CourseOfferings>
+  <CourseOffering>
+    <University>University of Alberta</University>
+    <Faculty>Science</Faculty>
+    <Department>Psychology</Department>
+    <CourseCode>PSYC 102</CourseCode>
+    <CourseName>Intro to Human Behavior</CourseName>
+    <Instructor>Eris Morne</Instructor>
+    <Student>Sarah Brown</Student>
+    <Major>Psychology</Major>
+    <Year>2026</Year>
+    <Semester>Winter</Semester>
+  </CourseOffering>
+</CourseOfferings>
