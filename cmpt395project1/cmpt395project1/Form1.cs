@@ -16,6 +16,7 @@ namespace cmpt395project1
         SqlConnection myConnection;
         SqlCommand myCommand;
         SqlDataReader myReader;
+        SqlConnection warehouseConnection;
 
         public Form1()
         {
@@ -36,7 +37,27 @@ namespace cmpt395project1
             catch
             {
             }
-            
+
+            // Part 2 connection
+            try
+            {
+                warehouseConnection = new SqlConnection(
+                    "Server=LAPTOP-3MSVSB2A;" +
+                    "Database=DW_AdvancedEducation;" +
+                    "Integrated Security=True;"
+                );
+                warehouseConnection.Open();
+                MessageBox.Show("Warehouse connected!");
+            }
+            catch (Exception ex2)
+            {
+                MessageBox.Show("Warehouse error: " + ex2.Message);
+            }
+
+            cboView.SelectedIndex = 0;
+
+
+
         }
 
         private void btnSearch_Click(object sender, EventArgs e)
@@ -62,24 +83,35 @@ namespace cmpt395project1
         private void Form1_Load_1(object sender, EventArgs e)
         {
             myCommand.CommandText = "SELECT DISTINCT Term FROM Course_sec";
-            myReader = myCommand.ExecuteReader();
-            while (myReader.Read())
+            try
             {
-                cmbTerm.Items.Add(myReader["Term"].ToString());
+                myReader = myCommand.ExecuteReader();
+                while (myReader.Read())
+                {
+                    cmbTerm.Items.Add(myReader["Term"].ToString());
+                }
+                myReader.Close();
+                cmbTerm.SelectedIndex = 0;
             }
-            myReader.Close();
-            cmbTerm.SelectedIndex = 0;
+            catch
+            {
+            }
 
             myCommand.CommandText = "SELECT DISTINCT Year FROM Course_sec ORDER BY Year";
-            myReader = myCommand.ExecuteReader();
-            while (myReader.Read())
+            try
             {
-                cmbYear.Items.Add(myReader["Year"].ToString());
+                myReader = myCommand.ExecuteReader();
+                while (myReader.Read())
+                {
+                    cmbYear.Items.Add(myReader["Year"].ToString());
+                }
+                myReader.Close();
+                cmbYear.SelectedIndex = 0;
             }
-            myReader.Close();
-            cmbYear.SelectedIndex = 0;
+            catch
+            {
+            }
 
-            // setup cart datagridview column, enrollment will be done based on SectionID, other columns are just for display purposes
             dgvCart.Columns.Add("StudentID", "Student ID");
             dgvCart.Columns.Add("SectionID", "Section ID");
             dgvCart.Columns.Add("CourseCode", "Course Code");
@@ -259,6 +291,73 @@ namespace cmpt395project1
             dgvCart.Rows.Clear();
             MessageBox.Show("Cart cleared!", "Success");
         }
+
+        // ----------- Part 2 and Part 3 Stuff ---------------
+        // ---------------------------------------------------
+
+        private void btnRun_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnRun_Click_1(object sender, EventArgs e)
+        {
+            try
+            {
+                string query = "";
+
+                if (cboView.SelectedIndex == 0)
+                    query = @"SELECT University, COUNT(*) AS TotalCourses
+                      FROM FactCourseOffering f
+                      JOIN DimCourse c ON f.CourseKey = c.CourseKey
+                      GROUP BY University";
+
+                else if (cboView.SelectedIndex == 1)
+                    query = @"SELECT University, Faculty, COUNT(*) AS TotalCourses
+                      FROM FactCourseOffering f
+                      JOIN DimCourse c ON f.CourseKey = c.CourseKey
+                      GROUP BY University, Faculty";
+
+                else if (cboView.SelectedIndex == 2)
+                    query = @"SELECT University, Faculty, Department, COUNT(*) AS TotalCourses
+                      FROM FactCourseOffering f
+                      JOIN DimCourse c ON f.CourseKey = c.CourseKey
+                      GROUP BY University, Faculty, Department";
+
+                else if (cboView.SelectedIndex == 3)
+                    query = @"SELECT Year, Semester, COUNT(*) AS TotalCourses
+                      FROM FactCourseOffering f
+                      JOIN DimDate d ON f.DateKey = d.DateKey
+                      GROUP BY Year, Semester
+                      ORDER BY Year, Semester";
+
+                else if (cboView.SelectedIndex == 4)
+                    query = @"SELECT i.InstructorName, COUNT(*) AS CoursesTaught
+                      FROM FactCourseOffering f
+                      JOIN DimInstructor i ON f.InstructorKey = i.InstructorKey
+                      GROUP BY i.InstructorName";
+
+                else if (cboView.SelectedIndex == 5)
+                    query = @"SELECT s.Major, COUNT(*) AS EnrollmentCount
+                      FROM FactCourseOffering f
+                      JOIN DimStudent s ON f.StudentKey = s.StudentKey
+                      GROUP BY s.Major";
+
+                SqlDataAdapter da = new SqlDataAdapter(query, warehouseConnection);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                dgvResults.DataSource = dt;
+                lblStatus.Text = dt.Rows.Count + " rows returned · " + cboView.SelectedItem.ToString();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace);
+            }
+
+        }
+    }
+}
 
         private void btnRegister_Click_1(object sender, EventArgs e)
         {
