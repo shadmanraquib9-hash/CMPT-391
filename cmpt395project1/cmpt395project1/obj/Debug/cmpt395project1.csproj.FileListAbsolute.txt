@@ -19,3 +19,14 @@ C:\Users\ethan\source\repos\shadmanraquib9-hash\CMPT-391\cmpt395project1\cmpt395
 C:\Users\ethan\source\repos\shadmanraquib9-hash\CMPT-391\cmpt395project1\cmpt395project1\obj\Debug\cmpt395project1.csproj.CoreCompileInputs.cache
 C:\Users\ethan\source\repos\shadmanraquib9-hash\CMPT-391\cmpt395project1\cmpt395project1\obj\Debug\cmpt395project1.exe
 C:\Users\ethan\source\repos\shadmanraquib9-hash\CMPT-391\cmpt395project1\cmpt395project1\obj\Debug\cmpt395project1.pdb
+C:\Users\ethan\Source\Repos\CMPT-391testmerge\cmpt395project1\cmpt395project1\bin\Debug\cmpt395project1.exe.config
+C:\Users\ethan\Source\Repos\CMPT-391testmerge\cmpt395project1\cmpt395project1\bin\Debug\cmpt395project1.exe
+C:\Users\ethan\Source\Repos\CMPT-391testmerge\cmpt395project1\cmpt395project1\bin\Debug\cmpt395project1.pdb
+C:\Users\ethan\Source\Repos\CMPT-391testmerge\cmpt395project1\cmpt395project1\obj\Debug\cmpt395project1.csproj.AssemblyReference.cache
+C:\Users\ethan\Source\Repos\CMPT-391testmerge\cmpt395project1\cmpt395project1\obj\Debug\cmpt395project1.exe.config
+C:\Users\ethan\Source\Repos\CMPT-391testmerge\cmpt395project1\cmpt395project1\obj\Debug\cmpt395project1.Form1.resources
+C:\Users\ethan\Source\Repos\CMPT-391testmerge\cmpt395project1\cmpt395project1\obj\Debug\cmpt395project1.Properties.Resources.resources
+C:\Users\ethan\Source\Repos\CMPT-391testmerge\cmpt395project1\cmpt395project1\obj\Debug\cmpt395project1.csproj.GenerateResource.cache
+C:\Users\ethan\Source\Repos\CMPT-391testmerge\cmpt395project1\cmpt395project1\obj\Debug\cmpt395project1.csproj.CoreCompileInputs.cache
+C:\Users\ethan\Source\Repos\CMPT-391testmerge\cmpt395project1\cmpt395project1\obj\Debug\cmpt395project1.exe
+C:\Users\ethan\Source\Repos\CMPT-391testmerge\cmpt395project1\cmpt395project1\obj\Debug\cmpt395project1.pdb

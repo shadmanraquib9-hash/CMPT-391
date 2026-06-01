@@ -42,7 +42,8 @@ namespace cmpt395project1
             try
             {
                 warehouseConnection = new SqlConnection(
-                    "Server=LAPTOP-3MSVSB2A;" +
+                    //"Server=LAPTOP-3MSVSB2A;" +
+                    "Server=DESKTOP-ACSBV06;" +
                     "Database=DW_AdvancedEducation;" +
                     "Integrated Security=True;"
                 );
@@ -356,8 +357,8 @@ namespace cmpt395project1
             }
 
         }
-    }
-}
+    
+
 
         private void btnRegister_Click_1(object sender, EventArgs e)
         {
@@ -485,4 +486,4 @@ namespace cmpt395project1
             }
         }
     }
-}
+   }
